@@ -1,0 +1,1 @@
+This software will constantly check for new world records across all the games on https://bigft.io/vrsr. When a new WR is detected, a release will be posted to this repository, which will then be accessed using the GitHub API in other projects.
