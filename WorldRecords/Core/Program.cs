@@ -92,7 +92,6 @@ namespace WorldRecords.Core
                         var game = games[i];
                         var req = "";
 
-
                         FConsole.WriteLine($"Checking game: {game.name} ({i + 1}/{games.Count})");
 
                         try
@@ -165,6 +164,15 @@ namespace WorldRecords.Core
                                             {
                                                 await CheckForNewWR(run.runs[0].run, vars);
                                             }
+                                            else
+                                            {
+                                                var record = new Record("", (string)run.game, (string)run.category, vars);
+                                                if (!records.Any(r => r.IsSameCategory(record)))
+                                                {
+                                                    records.Add(record);
+                                                    File.WriteAllText("files/records.json", JsonConvert.SerializeObject(records, Formatting.Indented));
+                                                }
+                                            }
                                         }
 
                                         await Task.Delay(3000);
@@ -191,6 +199,15 @@ namespace WorldRecords.Core
                                         if (run.runs.Count > 0)
                                         {
                                             await CheckForNewWR(run.runs[0].run);
+                                        }
+                                        else
+                                        {
+                                            var record = new Record("", (string)run.game, (string)run.category, "");
+                                            if (!records.Any(r => r.IsSameCategory(record)))
+                                            {
+                                                records.Add(record);
+                                                File.WriteAllText("files/records.json", JsonConvert.SerializeObject(records, Formatting.Indented));
+                                            }
                                         }
                                     }
                                 }
@@ -231,23 +248,14 @@ namespace WorldRecords.Core
 
                     File.WriteAllText("files/records.json", JsonConvert.SerializeObject(records, Formatting.Indented));
 
-                    newRecord = true;
+                    FConsole.WriteLine($"- New record found (ID: \"{record.id}\")");
+                    await PostWR(record.id);
                 }
             }
-            else
+            else //new game/category; dont post record
             {
                 records.Add(record);
-                
                 File.WriteAllText("files/records.json", JsonConvert.SerializeObject(records, Formatting.Indented));
-                
-                newRecord = true;
-            }
-
-            if (newRecord)
-            {
-                FConsole.WriteLine($"- New record found (ID: \"{record.id}\")");
-
-                await PostWR(record.id);
             }
         }
 
@@ -256,8 +264,6 @@ namespace WorldRecords.Core
             var time = DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
             var release = new NewRelease(time.ToString());
             release.Name = id;
-
-            Console.WriteLine(release.TagName);
 
             await client.Repository.Release.Create("VRSRBot", "test", release); //test repo
         }

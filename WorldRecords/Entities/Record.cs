@@ -31,10 +31,7 @@ namespace WorldRecords.Entities
 
         public bool Equals(Record record)
         {
-            return id == record.id
-                && game == record.game
-                && category == record.category
-                && subcats == record.subcats;
+            return id == record.id;
         }
     }
 }
