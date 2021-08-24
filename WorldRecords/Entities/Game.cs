@@ -11,6 +11,7 @@ namespace WorldRecords.Entities
     {
         public string id;
         public string abbreviation;
+        public string api_id;
         public string name;
         public string hardware;
         public string color;

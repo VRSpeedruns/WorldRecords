@@ -62,28 +62,23 @@ namespace WorldRecords.Core
             client = new GitHubClient(new ProductHeaderValue("WorldRecords"));
             client.Credentials = creds;
 
-            int count = 10;
             while (true)
             {
                 using (WebClient wc = new WebClient())
                 {
-                    if (count++ == 10)
+                    FConsole.WriteLine("Getting games from VRSpeed.run.");
+                    while (true)
                     {
-                        FConsole.WriteLine("Getting games from VRSpeed.run.");
-                        count = 0;
-                        while (true)
+                        try
                         {
-                            try
-                            {
-                                var str = await wc.DownloadStringTaskAsync("https://vrspeed.run/vrsrassets/other/games.json");
-                                games = JsonConvert.DeserializeObject<List<Game>>(str);
-                                break;
-                            }
-                            catch (Exception e)
-                            {
-                                FConsole.WriteLine($"&cERROR: &fError when trying to get games from VRSpeed.run. Retrying in 5 seconds.\n&7 - \"{e.Message}\"");
-                                await Task.Delay(5000);
-                            }
+                            var str = await wc.DownloadStringTaskAsync("https://vrspeed.run/vrsrassets/other/games.json");
+                            games = JsonConvert.DeserializeObject<List<Game>>(str);
+                            break;
+                        }
+                        catch (Exception e)
+                        {
+                            FConsole.WriteLine($"&cERROR: &fError when trying to get games from VRSpeed.run. Retrying in 7.5 seconds.\n&7 - \"{e.Message}\"");
+                            await Task.Delay(7500);
                         }
                     }
 
@@ -100,7 +95,7 @@ namespace WorldRecords.Core
                         }
                         catch (Exception e)
                         {
-                            FConsole.WriteLine($"&cERROR: &fError when trying to access game \"{game.id}\". Retrying in 3 seconds.\n&7 - \"{e.Message}\"");
+                            FConsole.WriteLine($"&cERROR: &fError when trying to access game \"{game.id}\". Retrying in 7.5 seconds.\n&7 - \"{e.Message}\"");
                             i--;
                         }
 
@@ -153,7 +148,7 @@ namespace WorldRecords.Core
                                         }
                                         catch (Exception e)
                                         {
-                                            FConsole.WriteLine($"&cERROR: &fError when trying to access category \"{category.id} ({vars})\" of game \"{game.id}\". Retrying in 3 seconds.\n&7 - \"{e.Message}\"");
+                                            FConsole.WriteLine($"&cERROR: &fError when trying to access category \"{category.id} ({vars})\" of game \"{game.id}\". Retrying in 7.5 seconds.\n&7 - \"{e.Message}\"");
                                             m--;
                                         }
 
@@ -175,7 +170,7 @@ namespace WorldRecords.Core
                                             }
                                         }
 
-                                        await Task.Delay(3000);
+                                        await Task.Delay(7500);
                                     }
                                 }
                                 else
@@ -189,7 +184,7 @@ namespace WorldRecords.Core
                                     }
                                     catch (Exception e)
                                     {
-                                        FConsole.WriteLine($"&cERROR: &fError when trying to access category \"{category.id}\" of game \"{game.id}\". Retrying in 3 seconds.\n&7 - \"{e.Message}\"");
+                                        FConsole.WriteLine($"&cERROR: &fError when trying to access category \"{category.id}\" of game \"{game.id}\". Retrying in 7.5 seconds.\n&7 - \"{e.Message}\"");
                                         k--;
                                     }
 
@@ -203,8 +198,14 @@ namespace WorldRecords.Core
                                         else
                                         {
                                             var record = new Record("", (string)run.game, (string)run.category, "");
-                                            if (!records.Any(r => r.IsSameCategory(record)))
+                                            if (!records.Any(r => r.IsSameCategory(record))) //new category with no run - save with empty id
                                             {
+                                                records.Add(record);
+                                                File.WriteAllText("files/records.json", JsonConvert.SerializeObject(records, Formatting.Indented));
+                                            }
+                                            else
+                                            {
+                                                records.RemoveAll(r => r.IsSameCategory(record));
                                                 records.Add(record);
                                                 File.WriteAllText("files/records.json", JsonConvert.SerializeObject(records, Formatting.Indented));
                                             }
@@ -212,11 +213,11 @@ namespace WorldRecords.Core
                                     }
                                 }
 
-                                await Task.Delay(3000);
+                                await Task.Delay(7500);
                             }
                         }
 
-                        await Task.Delay(3000);
+                        await Task.Delay(7500);
                     }
                 }
             }
@@ -224,19 +225,8 @@ namespace WorldRecords.Core
 
         static async Task CheckForNewWR(dynamic run, string subcats = "")
         {
-            string player;
-            if (run.players[0].rel == "guest")
-            {
-                player = run.players[0].name;
-            }
-            else
-            {
-                player = run.players[0].id;
-            }
-
             var record = new Record((string)run.id, (string)run.game, (string)run.category, subcats);
 
-            bool newRecord = false;
             if (records.Any(r => r.IsSameCategory(record)))
             {
                 var existing = records.First(r => r.IsSameCategory(record));
