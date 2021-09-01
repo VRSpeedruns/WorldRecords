@@ -128,10 +128,14 @@ namespace WorldRecords.Core
                                         {
                                             string _value = JsonConvert.SerializeObject(__value);
                                             var id = _value.Split(new[] { '"' }, 2)[1].Split('"')[0];
-                                            var query = $"&var-{variable.id}={id}";
-                                            list.Add(query);
+
+                                            if (!game.ignoredVariables.Any(v => v.id == variable.id && v.value == id))
+                                            {
+                                                var query = $"&var-{variable.id}={id}";
+                                                list.Add(query);
+                                            }
                                         }
-                                        combos.Add(list);
+                                        if (list.Count > 0) combos.Add(list);
                                     }
 
                                     var allCombinations = Func.CartesianProduct(combos);
