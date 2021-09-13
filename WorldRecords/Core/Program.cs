@@ -129,7 +129,7 @@ namespace WorldRecords.Core
                                             string _value = JsonConvert.SerializeObject(__value);
                                             var id = _value.Split(new[] { '"' }, 2)[1].Split('"')[0];
 
-                                            if (!game.ignoredVariables.Any(v => v.id == variable.id && v.value == id))
+                                            if (!game.ignoredVariables.Any(v => v.id == (string)variable.id && v.value == id))
                                             {
                                                 var query = $"&var-{variable.id}={id}";
                                                 list.Add(query);
