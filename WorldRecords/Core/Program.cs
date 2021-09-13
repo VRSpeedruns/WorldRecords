@@ -259,7 +259,7 @@ namespace WorldRecords.Core
             var release = new NewRelease(time.ToString());
             release.Name = id;
 
-            await client.Repository.Release.Create("VRSRBot", "test", release); //test repo
+            await client.Repository.Release.Create("VRSRBot", "LatestWorldRecords", release);
         }
     }
 }
