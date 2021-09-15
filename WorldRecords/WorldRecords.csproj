@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Heartbeat.cs" />
     <Compile Include="Entities\Game.cs" />
     <Compile Include="Core\Program.cs" />
     <Compile Include="Entities\Record.cs" />

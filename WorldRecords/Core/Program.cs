@@ -54,6 +54,8 @@ namespace WorldRecords.Core
             }
             records = JsonConvert.DeserializeObject<List<Record>>(File.ReadAllText("files/records.json"));
 
+            Heartbeat.Start(creds);
+
             MainAsync().GetAwaiter().GetResult();
         }
 
@@ -237,13 +239,21 @@ namespace WorldRecords.Core
 
                 if (!record.Equals(existing))
                 {
+                    try
+                    {
+                        FConsole.WriteLine($"- New record found (ID: \"{record.id}\")");
+                        await PostWR(record.id);
+                    }
+                    catch
+                    {
+                        FConsole.WriteLine($"&cERROR: &fError when trying to post new WR \"{record.id}\". Skipping for now.");
+                        return;
+                    }
+
                     records.Remove(existing);
                     records.Add(record);
 
                     File.WriteAllText("files/records.json", JsonConvert.SerializeObject(records, Formatting.Indented));
-
-                    FConsole.WriteLine($"- New record found (ID: \"{record.id}\")");
-                    await PostWR(record.id);
                 }
             }
             else //new game/category; dont post record
